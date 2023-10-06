@@ -287,6 +287,27 @@ class SocialCubit extends Cubit<SocialStates> {
     });
   }
 
+  File? messageImage;
+
+  Future<void> getMessagetImage() async {
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (pickedFile != null) {
+      messageImage = File(pickedFile.path);
+      emit(SocialMessageImagePickedSuccessState());
+    } else {
+      print('No image selected.');
+      emit(SocialMessageImagePickedErrorState());
+    }
+  }
+
+  void removeMessageImage() {
+    messageImage = null;
+    emit(SocialRemoveMessageImageState());
+  }
+
   List<PostModel> posts = [];
   List<String> postsId = [];
   List<int> likes = [];
@@ -345,44 +366,57 @@ class SocialCubit extends Cubit<SocialStates> {
   void sendMessage({
     required String receiverId,
     required String dateTime,
-    required String text,
-  }) {
-    MessageModel model = MessageModel(
-      text: text,
-      senderId: userModel.uId,
-      receiverId: receiverId,
-      dateTime: dateTime,
-    );
+    String? text,
+    File? image,
+  }) async {
+    emit(SocialSendMessageLoadingState());
+    // String messageImage2 = '';
+    // if (image != null) {
+    //   await firebase_storage.FirebaseStorage.instance
+    //       .ref()
+    //       .child('message/${Uri.file(image.path).pathSegments.last}')
+    //       .putFile(image)
+    //       .then((value) async {
+    //     messageImage2 = await value.ref.getDownloadURL();
+    //   });
+    //   // to hidden temp image
+    //   messageImage = null;
+    // }
 
-    // set my chats
+    // MessageModel model = MessageModel(
+    //   text: text,
+    //   senderId: userModel.uId,
+    //   receiverId: receiverId,
+    //   dateTime: dateTime,
+    //   image: messageImage2,
+    // );
+    // FirebaseFirestore.instance
+    //     .collection('users')
+    //     .doc(userModel.uId)
+    //     .collection('chats')
+    //     .doc(receiverId)
+    //     .collection('messages')
+    //     .add(model.toMap())
+    //     .then((value) {
+    //   emit(SocialSendMessageSuccessState());
+    // }).catchError((error) {
+    //   emit(SocialSendMessageErrorState());
+    // });
 
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(userModel.uId)
-        .collection('chats')
-        .doc(receiverId)
-        .collection('messages')
-        .add(model.toMap())
-        .then((value) {
-      emit(SocialSendMessageSuccessState());
-    }).catchError((error) {
-      emit(SocialSendMessageErrorState());
-    });
+    // // set receiver chats
 
-    // set receiver chats
-
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(receiverId)
-        .collection('chats')
-        .doc(userModel.uId)
-        .collection('messages')
-        .add(model.toMap())
-        .then((value) {
-      emit(SocialSendMessageSuccessState());
-    }).catchError((error) {
-      emit(SocialSendMessageErrorState());
-    });
+    // FirebaseFirestore.instance
+    //     .collection('users')
+    //     .doc(receiverId)
+    //     .collection('chats')
+    //     .doc(userModel.uId)
+    //     .collection('messages')
+    //     .add(model.toMap())
+    //     .then((value) {
+    //   emit(SocialSendMessageSuccessState());
+    // }).catchError((error) {
+    //   emit(SocialSendMessageErrorState());
+    // });
   }
 
   List<MessageModel> messages = [];

@@ -36,7 +36,7 @@ class ChatsScreen extends StatelessWidget {
           navigateTo(
             context,
             ChatDetailsScreen(
-              userModel: model,
+              receiveUserModel: model,
             ),
           );
         },
