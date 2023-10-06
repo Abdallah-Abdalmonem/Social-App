@@ -63,27 +63,15 @@ class ChatDetailsScreen extends StatelessWidget {
                             return Dismissible(
                               confirmDismiss:
                                   (DismissDirection direction) async {
-                                return await showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text("Remove"),
-                                      content: const Text(
-                                          "Are you sure you want to delete this message? 🐼"),
-                                      actions: <Widget>[
-                                        ElevatedButton(
-                                            onPressed: () {
-                                              // todo
-                                              Navigator.of(context).pop(true);
-                                            },
-                                            child: const Text("delete")),
-                                        ElevatedButton(
-                                          onPressed: () =>
-                                              Navigator.of(context).pop(false),
-                                          child: const Text("No"),
-                                        ),
-                                      ],
-                                    );
+                                await (showCustomAlert
+                                  context,
+                                  title: 'Remove',
+                                  content:
+                                      'Are you sure you want to delete this message? 🐼',
+                                  confirmActionText: 'Delete',
+                                  cancelActionText: 'Cancel',
+                                  confirmActionPressed: () {
+                                    //to do
                                   },
                                 );
                               },
@@ -97,7 +85,8 @@ class ChatDetailsScreen extends StatelessWidget {
                               key: Key('${'d $index'}'),
                               child: SocialCubit.get(context).userModel.uId ==
                                       message.senderId
-                                  ? buildMyMessage(message, myUserModel)
+                                  ? buildMyMessage(
+                                      message, myUserModel, context, index)
                                   : buildMessage(message),
                             );
                           },
@@ -107,35 +96,7 @@ class ChatDetailsScreen extends StatelessWidget {
                         ),
                       ),
                       if (SocialCubit.get(context).messageImage != null)
-                        Stack(
-                          alignment: AlignmentDirectional.topEnd,
-                          children: [
-                            Container(
-                              height: 140.0,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4.0),
-                                image: DecorationImage(
-                                  image: FileImage(
-                                      SocialCubit.get(context).messageImage!),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const CircleAvatar(
-                                radius: 20.0,
-                                child: Icon(
-                                  Icons.close,
-                                  size: 16.0,
-                                ),
-                              ),
-                              onPressed: () {
-                                SocialCubit.get(context).removeMessageImage();
-                              },
-                            ),
-                          ],
-                        ),
+                        buildImageTemp(context),
                       const SizedBox(height: 10),
                       buildButtonSend(context),
                     ],
@@ -160,6 +121,37 @@ class ChatDetailsScreen extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Stack buildImageTemp(BuildContext context) {
+    return Stack(
+      alignment: AlignmentDirectional.topEnd,
+      children: [
+        Container(
+          height: 140.0,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4.0),
+            image: DecorationImage(
+              image: FileImage(SocialCubit.get(context).messageImage!),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const CircleAvatar(
+            radius: 20.0,
+            child: Icon(
+              Icons.close,
+              size: 16.0,
+            ),
+          ),
+          onPressed: () {
+            SocialCubit.get(context).removeMessageImage();
+          },
+        ),
+      ],
     );
   }
 
@@ -230,17 +222,25 @@ class ChatDetailsScreen extends StatelessWidget {
         ),
       );
 
-  Widget buildMyMessage(
-          MessageModel myMessageModel, SocialUserModel myUserModel) =>
+  Widget buildMyMessage(MessageModel myMessageModel,
+          SocialUserModel myUserModel, BuildContext context, int index) =>
       Align(
         alignment: AlignmentDirectional.centerEnd,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            CircleAvatar(
-              radius: 20.0,
-              backgroundImage: NetworkImage(myUserModel.image!),
-            ),
+            // SocialCubit.get(context).messages[index].senderId ==
+            //         SocialCubit.get(context).messages[index - 1].senderId
+            (index + 1).toString() == (index).toString()
+                ? SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: Text('${index}'),
+                  )
+                : CircleAvatar(
+                    radius: 20.0,
+                    backgroundImage: NetworkImage(myUserModel.image!),
+                  ),
             const SizedBox(width: 5),
             Expanded(
               child: Container(
@@ -279,14 +279,17 @@ class ChatDetailsScreen extends StatelessWidget {
                         ),
                       ),
                     Align(
-                        alignment: MyFunctions.isArabic(myMessageModel.text!)
-                            ? AlignmentDirectional.centerEnd
-                            : AlignmentDirectional.centerStart,
-                        child: Text(myMessageModel.text!)),
+                      alignment: MyFunctions.isArabic(myMessageModel.text!)
+                          ? AlignmentDirectional.centerEnd
+                          : AlignmentDirectional.centerStart,
+                      child: Text(myMessageModel.text!),
+                    ),
                     Align(
                       alignment: AlignmentDirectional.bottomEnd,
-                      child: Text(myMessageModel.dateTime!.substring(10, 16),
-                          style: const TextStyle(fontSize: 10)),
+                      child: Text(
+                        myMessageModel.dateTime!.substring(10, 16),
+                        style: const TextStyle(fontSize: 10),
+                      ),
                     ),
                   ],
                 ),
