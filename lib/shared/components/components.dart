@@ -168,3 +168,34 @@ Color chooseToastColor(ToastStates state) {
 
   return color;
 }
+
+showCustomAlert(
+  BuildContext context, {
+  required String title,
+  required String content,
+  required String confirmActionText,
+  required String cancelActionText,
+  required VoidCallback confirmActionPressed,
+}) async {
+  await showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(cancelActionText),
+          ),
+          TextButton(
+              onPressed: () {
+                confirmActionPressed;
+                Navigator.of(context).pop(true);
+              },
+              child: Text(confirmActionText)),
+        ],
+      );
+    },
+  );
+}
