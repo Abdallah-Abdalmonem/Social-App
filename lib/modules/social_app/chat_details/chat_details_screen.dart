@@ -22,7 +22,7 @@ class ChatDetailsScreen extends StatelessWidget {
 
   var messageController = TextEditingController();
   ScrollController _scrollController = new ScrollController();
-
+  // todo scroll when se
   @override
   Widget build(BuildContext context) {
     var myUserModel = SocialCubit.get(context).userModel;
@@ -30,7 +30,15 @@ class ChatDetailsScreen extends StatelessWidget {
       builder: (BuildContext context) {
         SocialCubit.get(context).getMessages(receiverId: receiveUserModel.uId!);
         return BlocConsumer<SocialCubit, SocialStates>(
-          listener: (context, state) {},
+          listener: (context, state) {
+            if (state is SocialSendMessageSuccessState ||
+                state is SocialGetMessagesSuccessState) {
+              _scrollController.animateTo(
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.bounceInOut,
+                  _scrollController.position.maxScrollExtent + 100);
+            }
+          },
           builder: (context, state) {
             return Scaffold(
               appBar: AppBar(
@@ -63,7 +71,7 @@ class ChatDetailsScreen extends StatelessWidget {
                             return Dismissible(
                               confirmDismiss:
                                   (DismissDirection direction) async {
-                                await (showCustomAlert
+                                await showCustomAlert(
                                   context,
                                   title: 'Remove',
                                   content:
@@ -165,13 +173,13 @@ class ChatDetailsScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: const BorderRadiusDirectional.only(
-                    bottomEnd: Radius.circular(10.0),
+                    bottomStart: Radius.circular(10.0),
                     topStart: Radius.circular(10.0),
                     topEnd: Radius.circular(10.0),
                   ),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                    const EdgeInsets.symmetric(vertical: 3.0, horizontal: 5.0),
                 child: Column(
                   children: [
                     Align(
@@ -185,7 +193,7 @@ class ChatDetailsScreen extends StatelessWidget {
                       ),
                     ),
                     if (receiveMessageModel.image != null &&
-                        receiveMessageModel.image == '')
+                        receiveMessageModel.image != '')
                       Container(
                         clipBehavior: Clip.antiAlias,
                         decoration: BoxDecoration(
@@ -197,12 +205,13 @@ class ChatDetailsScreen extends StatelessWidget {
                           width: double.infinity,
                         ),
                       ),
-                    Align(
-                        alignment:
-                            MyFunctions.isArabic(receiveMessageModel.text!)
-                                ? AlignmentDirectional.centerEnd
-                                : AlignmentDirectional.centerStart,
-                        child: Text(receiveMessageModel.text!)),
+                    if (receiveMessageModel.text!.isNotEmpty)
+                      Align(
+                          alignment:
+                              MyFunctions.isArabic(receiveMessageModel.text!)
+                                  ? AlignmentDirectional.centerEnd
+                                  : AlignmentDirectional.centerStart,
+                          child: Text(receiveMessageModel.text!)),
                     Align(
                       alignment: AlignmentDirectional.bottomEnd,
                       child: Text(
@@ -232,10 +241,10 @@ class ChatDetailsScreen extends StatelessWidget {
             // SocialCubit.get(context).messages[index].senderId ==
             //         SocialCubit.get(context).messages[index - 1].senderId
             (index + 1).toString() == (index).toString()
-                ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: Text('${index}'),
+                //todo
+                ? const CircleAvatar(
+                    radius: 20.0,
+                    backgroundColor: Colors.transparent,
                   )
                 : CircleAvatar(
                     radius: 20.0,
@@ -247,13 +256,13 @@ class ChatDetailsScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: defaultColor.shade200,
                   borderRadius: const BorderRadiusDirectional.only(
-                    bottomStart: Radius.circular(10.0),
+                    bottomEnd: Radius.circular(10.0),
                     topStart: Radius.circular(10.0),
                     topEnd: Radius.circular(10.0),
                   ),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
                 child: Column(
                   children: [
                     // Align(
@@ -278,12 +287,13 @@ class ChatDetailsScreen extends StatelessWidget {
                           width: double.infinity,
                         ),
                       ),
-                    Align(
-                      alignment: MyFunctions.isArabic(myMessageModel.text!)
-                          ? AlignmentDirectional.centerEnd
-                          : AlignmentDirectional.centerStart,
-                      child: Text(myMessageModel.text!),
-                    ),
+                    if (myMessageModel.text!.isNotEmpty)
+                      Align(
+                        alignment: MyFunctions.isArabic(myMessageModel.text!)
+                            ? AlignmentDirectional.centerEnd
+                            : AlignmentDirectional.centerStart,
+                        child: Text(myMessageModel.text!),
+                      ),
                     Align(
                       alignment: AlignmentDirectional.bottomEnd,
                       child: Text(
@@ -307,9 +317,7 @@ class ChatDetailsScreen extends StatelessWidget {
           color: Colors.grey[300]!,
           width: 1.0,
         ),
-        borderRadius: BorderRadius.circular(
-          15.0,
-        ),
+        borderRadius: BorderRadius.circular(15.0),
       ),
       clipBehavior: Clip.antiAliasWithSaveLayer,
       child: Row(
@@ -318,12 +326,11 @@ class ChatDetailsScreen extends StatelessWidget {
             child: Form(
               key: formKey,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 15.0,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
                 child: TextFormField(
                   validator: (value) {
-                    if (value!.isEmpty) {
+                    if (value!.isEmpty &&
+                        SocialCubit.get(context).messageImage == null) {
                       return 'message must not be empty';
                     }
                     return null;
@@ -342,7 +349,7 @@ class ChatDetailsScreen extends StatelessWidget {
             color: defaultColor,
             child: Row(
               children: [
-                buildCameraButton(context, receiveUserModel.uId.toString()),
+                buildCameraButton(context),
                 const VerticalDivider(
                   color: Colors.white,
                   width: 1,
@@ -362,10 +369,8 @@ class ChatDetailsScreen extends StatelessWidget {
                                 text: messageController.text,
                                 image: SocialCubit.get(context).messageImage,
                               );
-                              _scrollController.jumpTo(
-                                  _scrollController.position.maxScrollExtent);
 
-                              //clear textformfield
+                              // clear textformfield
                               messageController.text = '';
                             }
                           },
@@ -385,8 +390,7 @@ class ChatDetailsScreen extends StatelessWidget {
     );
   }
 
-  Container buildCameraButton(
-      BuildContext context, String receiveUserModelUid) {
+  Container buildCameraButton(BuildContext context) {
     return Container(
       height: double.infinity,
       color: Colors.grey[100],
