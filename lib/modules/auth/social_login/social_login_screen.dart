@@ -2,28 +2,32 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/layout/social_app/social_layout.dart';
-import 'package:social_app/modules/social_app/social_register/cubit/cubit.dart';
-import 'package:social_app/modules/social_app/social_register/cubit/states.dart';
+import 'package:social_app/modules/auth/social_login/cubit/cubit.dart';
+import 'package:social_app/modules/auth/social_login/cubit/states.dart';
+import 'package:social_app/modules/auth/social_register/social_register_screen.dart';
 import 'package:social_app/shared/components/components.dart';
 import 'package:social_app/shared/network/local/cache_helper.dart';
 
-class SocialRegisterScreen extends StatelessWidget {
+class SocialLoginScreen extends StatelessWidget {
   var formKey = GlobalKey<FormState>();
-  var nameController = TextEditingController();
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
-  var phoneController = TextEditingController();
 
-  SocialRegisterScreen({super.key});
+  SocialLoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => SocialRegisterCubit(),
-      child: BlocConsumer<SocialRegisterCubit, SocialRegisterStates>(
+      create: (BuildContext context) => SocialLoginCubit(),
+      child: BlocConsumer<SocialLoginCubit, SocialLoginStates>(
         listener: (context, state) {
-          // if (state is SocialCreateUserSuccessState) {
-          if (state is SocialRegisterSuccessState) {
+          if (state is SocialLoginErrorState) {
+            showToast(
+              text: state.error,
+              state: ToastStates.ERROR,
+            );
+          }
+          if (state is SocialLoginSuccessState) {
             CacheHelper.saveData(
               key: 'uId',
               value: state.uId,
@@ -48,7 +52,7 @@ class SocialRegisterScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'REGISTER',
+                          'LOGIN',
                           style: Theme.of(context)
                               .textTheme
                               .headlineMedium!
@@ -57,7 +61,7 @@ class SocialRegisterScreen extends StatelessWidget {
                               ),
                         ),
                         Text(
-                          'Register now to communicate with friends',
+                          'Login now to communicate with friends',
                           style:
                               Theme.of(context).textTheme.bodyLarge!.copyWith(
                                     color: Colors.grey,
@@ -65,21 +69,6 @@ class SocialRegisterScreen extends StatelessWidget {
                         ),
                         const SizedBox(
                           height: 30.0,
-                        ),
-                        defaultFormField(
-                          controller: nameController,
-                          type: TextInputType.name,
-                          validate: (String? value) {
-                            if (value!.isEmpty) {
-                              return 'please enter your name';
-                            }
-                            return null;
-                          },
-                          label: 'User Name',
-                          prefix: Icons.person,
-                        ),
-                        const SizedBox(
-                          height: 15.0,
                         ),
                         defaultFormField(
                           controller: emailController,
@@ -99,12 +88,18 @@ class SocialRegisterScreen extends StatelessWidget {
                         defaultFormField(
                           controller: passwordController,
                           type: TextInputType.visiblePassword,
-                          suffix: SocialRegisterCubit.get(context).suffix,
-                          onSubmit: (value) {},
-                          isPassword:
-                              SocialRegisterCubit.get(context).isPassword,
+                          suffix: SocialLoginCubit.get(context).suffix,
+                          onSubmit: (value) {
+                            if (formKey.currentState!.validate()) {
+                              // SocialLoginCubit.get(context).userLogin(
+                              //   email: emailController.text,
+                              //   password: passwordController.text,
+                              // );
+                            }
+                          },
+                          isPassword: SocialLoginCubit.get(context).isPassword,
                           suffixPressed: () {
-                            SocialRegisterCubit.get(context)
+                            SocialLoginCubit.get(context)
                                 .changePasswordVisibility();
                           },
                           validate: (String? value) {
@@ -117,41 +112,44 @@ class SocialRegisterScreen extends StatelessWidget {
                           prefix: Icons.lock_outline,
                         ),
                         const SizedBox(
-                          height: 15.0,
-                        ),
-                        defaultFormField(
-                          controller: phoneController,
-                          type: TextInputType.phone,
-                          validate: (String? value) {
-                            if (value!.isEmpty) {
-                              return 'please enter your phone number';
-                            }
-                            return null;
-                          },
-                          label: 'Phone',
-                          prefix: Icons.phone,
-                        ),
-                        const SizedBox(
                           height: 30.0,
                         ),
                         ConditionalBuilder(
-                          condition: state is! SocialRegisterLoadingState,
+                          condition: state is! SocialLoginLoadingState,
                           builder: (context) => defaultButton(
                             function: () {
                               if (formKey.currentState!.validate()) {
-                                SocialRegisterCubit.get(context).userRegister(
-                                  name: nameController.text,
+                                SocialLoginCubit.get(context).userLogin(
                                   email: emailController.text,
                                   password: passwordController.text,
-                                  phone: phoneController.text,
                                 );
                               }
                             },
-                            text: 'register',
+                            text: 'login',
                             isUpperCase: true,
                           ),
                           fallback: (context) =>
                               const Center(child: CircularProgressIndicator()),
+                        ),
+                        const SizedBox(
+                          height: 15.0,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Don\'t have an account?',
+                            ),
+                            defaultTextButton(
+                              function: () {
+                                navigateTo(
+                                  context,
+                                  SocialRegisterScreen(),
+                                );
+                              },
+                              text: 'register',
+                            ),
+                          ],
                         ),
                       ],
                     ),

@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/models/social_app/social_user_model.dart';
-import 'package:social_app/modules/social_app/social_register/cubit/states.dart';
+import 'package:social_app/modules/auth/social_register/cubit/states.dart';
 
 class SocialRegisterCubit extends Cubit<SocialRegisterStates> {
   SocialRegisterCubit() : super(SocialRegisterInitialState());

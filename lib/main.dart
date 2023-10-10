@@ -2,16 +2,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/modules/auth/social_login/social_login_screen.dart';
 import 'package:social_app/shared/bloc_observer.dart';
 import 'package:social_app/layout/social_app/cubit/cubit.dart';
 import 'package:social_app/layout/social_app/social_layout.dart';
-import 'package:social_app/modules/social_app/social_login/social_login_screen.dart';
 import 'package:social_app/shared/components/components.dart';
 import 'package:social_app/shared/components/constants.dart';
 import 'package:social_app/shared/cubit/cubit.dart';
 import 'package:social_app/shared/cubit/states.dart';
 import 'package:social_app/shared/network/local/cache_helper.dart';
 import 'package:social_app/shared/styles/themes.dart';
+import 'package:social_app/test_notification..dart';
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('on background message');
@@ -28,6 +29,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
+  //test local notification
+  await initializeNotifications();
+
   var token = await FirebaseMessaging.instance.getToken();
 
   print(token);
@@ -41,6 +45,11 @@ void main() async {
       text: 'on message',
       state: ToastStates.SUCCESS,
     );
+
+    sendNotification(
+        event.notification!.title.toString(),
+        event.notification!.body.toString(),
+        event.notification!.bodyLocArgs.toString());
   });
 
   // when click on notification to open app
@@ -68,15 +77,6 @@ void main() async {
   //token = CacheHelper.getData(key: 'token');
 
   uId = CacheHelper.getData(key: 'uId');
-
-  // if(onBoarding != null)
-  // {
-  //   if(token != null) widget = ShopLayout();
-  //   else widget = ShopLoginScreen();
-  // } else
-  //   {
-  //     widget = OnBoardingScreen();
-  //   }
 
   if (uId != null) {
     widget = SocialLayout();

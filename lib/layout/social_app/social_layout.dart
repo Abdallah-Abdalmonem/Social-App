@@ -1,9 +1,8 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/layout/social_app/cubit/cubit.dart';
 import 'package:social_app/layout/social_app/cubit/states.dart';
-import 'package:social_app/modules/social_app/new_post/new_post_screen.dart';
+import 'package:social_app/modules/new_post/new_post_screen.dart';
 import 'package:social_app/shared/components/components.dart';
 import 'package:social_app/shared/styles/icon_broken.dart';
 
@@ -34,7 +33,7 @@ class SocialLayout extends StatelessWidget {
                 icon: const Icon(
                   IconBroken.Notification,
                 ),
-                onPressed: () {},
+                onPressed: () async {},
               ),
               IconButton(
                 icon: const Icon(
@@ -68,12 +67,6 @@ class SocialLayout extends StatelessWidget {
                   IconBroken.Paper_Upload,
                 ),
                 label: 'Post',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  IconBroken.Location,
-                ),
-                label: 'Users',
               ),
               BottomNavigationBarItem(
                 icon: Icon(

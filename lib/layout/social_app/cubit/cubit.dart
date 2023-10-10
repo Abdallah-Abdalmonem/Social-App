@@ -8,11 +8,10 @@ import 'package:social_app/layout/social_app/cubit/states.dart';
 import 'package:social_app/models/social_app/message_model.dart';
 import 'package:social_app/models/social_app/post_model.dart';
 import 'package:social_app/models/social_app/social_user_model.dart';
-import 'package:social_app/modules/social_app/chats/chats_screen.dart';
-import 'package:social_app/modules/social_app/feeds/feeds_screen.dart';
-import 'package:social_app/modules/social_app/new_post/new_post_screen.dart';
-import 'package:social_app/modules/social_app/settings/settings_screen.dart';
-import 'package:social_app/modules/social_app/users/users_screen.dart';
+import 'package:social_app/modules/chats/chats_screen.dart';
+import 'package:social_app/modules/home/home_screen.dart';
+import 'package:social_app/modules/new_post/new_post_screen.dart';
+import 'package:social_app/modules/settings/settings_screen.dart';
 import 'package:social_app/shared/components/constants.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
@@ -23,10 +22,14 @@ class SocialCubit extends Cubit<SocialStates> {
 
   late SocialUserModel userModel;
 
-  void getUserData() {
+  void getUserData() async {
     emit(SocialGetUserLoadingState());
 
-    FirebaseFirestore.instance.collection('users').doc(uId).get().then((value) {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uId)
+        .get()
+        .then((value) {
       //print(value.data());
       userModel = SocialUserModel.fromJson(value.data()!);
       emit(SocialGetUserSuccessState());
@@ -39,10 +42,9 @@ class SocialCubit extends Cubit<SocialStates> {
   int currentIndex = 0;
 
   List<Widget> screens = [
-    const FeedsScreen(),
+    const HomeScreen(),
     const ChatsScreen(),
     NewPostScreen(),
-    UsersScreen(),
     const SettingsScreen(),
   ];
 
@@ -50,12 +52,12 @@ class SocialCubit extends Cubit<SocialStates> {
     'Home',
     'Chats',
     'Post',
-    'Users',
     'Settings',
   ];
 
   void changeBottomNav(int index) {
     if (index == 1) getUsers();
+
     if (index == 2) {
       emit(SocialNewPostState());
     } else {
@@ -313,16 +315,19 @@ class SocialCubit extends Cubit<SocialStates> {
   List<int> likes = [];
 
   void getPosts() {
+    posts = [];
+    emit(SocialGetPostsLoadingState());
     FirebaseFirestore.instance.collection('posts').get().then((value) {
       for (var element in value.docs) {
         element.reference.collection('likes').get().then((value) {
           likes.add(value.docs.length);
           postsId.add(element.id);
           posts.add(PostModel.fromJson(element.data()));
-        }).catchError((error) {});
+          emit(SocialGetPostsSuccessState());
+        }).catchError((error) {
+          SocialGetPostsErrorState(error.toString());
+        });
       }
-
-      emit(SocialGetPostsSuccessState());
     }).catchError((error) {
       print(error.toString());
       emit(SocialGetPostsErrorState(error.toString()));

@@ -31,12 +31,14 @@ class ChatDetailsScreen extends StatelessWidget {
         SocialCubit.get(context).getMessages(receiverId: receiveUserModel.uId!);
         return BlocConsumer<SocialCubit, SocialStates>(
           listener: (context, state) {
-            if (state is SocialSendMessageSuccessState ||
-                state is SocialGetMessagesSuccessState) {
-              _scrollController.animateTo(
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.bounceInOut,
-                  _scrollController.position.maxScrollExtent + 100);
+            if (SocialCubit.get(context).messages.length > 0) {
+              if (state is SocialSendMessageSuccessState ||
+                  state is SocialGetMessagesSuccessState) {
+                _scrollController.animateTo(
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.bounceInOut,
+                    _scrollController.position.maxScrollExtent + 100);
+              }
             }
           },
           builder: (context, state) {
