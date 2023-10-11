@@ -45,11 +45,6 @@ void main() async {
       text: 'on message',
       state: ToastStates.SUCCESS,
     );
-
-    sendNotification(
-        event.notification!.title.toString(),
-        event.notification!.body.toString(),
-        event.notification!.bodyLocArgs.toString());
   });
 
   // when click on notification to open app

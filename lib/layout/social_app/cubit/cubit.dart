@@ -255,11 +255,12 @@ class SocialCubit extends Cubit<SocialStates> {
           dateTime: dateTime,
           postImage: value,
         );
+        postImage = null;
       }).catchError((error) {
-        emit(SocialCreatePostErrorState());
+        emit(SocialCreatePostErrorState(error.toString()));
       });
     }).catchError((error) {
-      emit(SocialCreatePostErrorState());
+      emit(SocialCreatePostErrorState(error.toString()));
     });
   }
 
@@ -285,7 +286,7 @@ class SocialCubit extends Cubit<SocialStates> {
         .then((value) {
       emit(SocialCreatePostSuccessState());
     }).catchError((error) {
-      emit(SocialCreatePostErrorState());
+      emit(SocialCreatePostErrorState(error.toString()));
     });
   }
 

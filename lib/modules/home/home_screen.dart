@@ -32,6 +32,7 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 children: [
                   ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) => buildPostItem(
@@ -193,18 +194,15 @@ class HomeScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsetsDirectional.only(top: 15.0),
                   child: Container(
-                    height: 140.0,
+                    height: 300.0,
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(
                         4.0,
                       ),
                       image: DecorationImage(
-                        image: NetworkImage(
-                          '${model.postImage}',
-                        ),
-                        fit: BoxFit.cover,
-                      ),
+                          image: NetworkImage('${model.postImage}'),
+                          fit: BoxFit.cover),
                     ),
                   ),
                 ),

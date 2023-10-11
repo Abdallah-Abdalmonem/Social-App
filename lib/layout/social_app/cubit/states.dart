@@ -70,7 +70,11 @@ class SocialCreatePostLoadingState extends SocialStates {}
 
 class SocialCreatePostSuccessState extends SocialStates {}
 
-class SocialCreatePostErrorState extends SocialStates {}
+class SocialCreatePostErrorState extends SocialStates {
+  final String error;
+
+  SocialCreatePostErrorState(this.error);
+}
 
 class SocialPostImagePickedSuccessState extends SocialStates {}
 
